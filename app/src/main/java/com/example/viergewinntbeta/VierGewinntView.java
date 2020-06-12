@@ -20,7 +20,7 @@ public class VierGewinntView extends View {
     private Context context;
 
     private enum ZellenZustand {
-        SPIELER(Color.YELLOW), COMPUTER(Color.RED), LEER(Color.TRANSPARENT);
+        SPIELER(Color.GREEN), COMPUTER(Color.DKGRAY), LEER(Color.TRANSPARENT);
         private int color;
 
         ZellenZustand(int c) {
