@@ -1,0 +1,2 @@
+include ':app'
+rootProject.name = "Vier Gewinnt Beta"
