@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:id="@+id/linLayout0"
+    tools:context=".MainActivity">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:id="@+id/linLayout1"
+
+        >
+
+        <Button
+            android:id="@+id/button"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Neu: du beginnst" />
+
+        <Button
+            android:id="@+id/button3"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Neu: KI beginnt" />
+
+        <Button
+            android:id="@+id/button2"
+            android:layout_width="0dp"
+            android:layout_height="match_parent"
+            android:layout_weight="1"
+            android:text="Verlassen" />
+    </LinearLayout>
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal">
+
+
+        <TextView
+            android:id="@+id/textView2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:padding="5dp"
+            android:textSize="14sp"
+            android:textStyle="bold"
+            android:text="KI-Stärke: " />
+
+        <RadioGroup
+        android:layout_width="wrap_content"
+        android:layout_height="match_parent"
+
+        android:orientation="horizontal">
+
+            <RadioButton
+                android:id="@+id/radioButton1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:checked="true"
+                android:text="noob" />
+
+            <RadioButton
+                android:id="@+id/radioButton2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="fortgeschritten" />
+
+            <RadioButton
+                android:id="@+id/radioButton3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="episch"
+                android:visibility="invisible" />
+    </RadioGroup>
+</LinearLayout>
+    <Space
+        android:layout_width="match_parent"
+        android:layout_height="5dp"/>
+
+</LinearLayout>
