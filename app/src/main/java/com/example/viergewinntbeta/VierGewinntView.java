@@ -9,6 +9,7 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.graphics.Rect;
 import android.os.AsyncTask;
+import android.service.notification.ZenPolicy;
 import android.view.MotionEvent;
 import android.view.View;
 import android.widget.Toast;
@@ -20,7 +21,7 @@ public class VierGewinntView extends View {
     private Context context;
 
     private enum ZellenZustand {
-        SPIELER(Color.GREEN), COMPUTER(Color.DKGRAY), LEER(Color.TRANSPARENT);
+        SPIELER(Color.YELLOW), COMPUTER(Color.RED), LEER(Color.TRANSPARENT);
         private int color;
 
         ZellenZustand(int c) {
@@ -154,7 +155,7 @@ public class VierGewinntView extends View {
                     // Spalte ermitteln
                     pfeilGeklickt = (int) (xPos - abstandRand) / zellGroesse;
                     // Zeile ermitteln
-                    zeile = niedrigsteFreieZeileErmitteln(pfeilGeklickt);
+                    zeile = niedrigsteFreieZeileErmitteln(spielFeld, pfeilGeklickt);
                     if (spielFeld[zeile][pfeilGeklickt] == ZellenZustand.LEER) {
                         // gültiger Zug liegt vor
                         // Zelle neue Farbe zuweisen
@@ -183,7 +184,7 @@ public class VierGewinntView extends View {
         return super.onTouchEvent(event);
     }
 
-    int niedrigsteFreieZeileErmitteln(int spalte) {
+    int niedrigsteFreieZeileErmitteln(ZellenZustand[][] spielFeld, int spalte) {
         int zeile = ANZ_ZEILEN - 1;
         while (spielFeld[zeile][spalte] != ZellenZustand.LEER && zeile > 0) {
             zeile--;
@@ -286,6 +287,7 @@ public class VierGewinntView extends View {
                         kiStaerke1(); break;
                     case 2:
                         kiStaerke2(); break;
+                    case 3: kiStaerke3(); break;
                     default:
                 }
             }
@@ -312,7 +314,7 @@ public class VierGewinntView extends View {
 
             while (true) {
                 y = zufallszahlenGenerator.nextInt(ANZ_SPALTEN);
-                x = niedrigsteFreieZeileErmitteln(y);
+                x = niedrigsteFreieZeileErmitteln(spielFeld, y);
                 if (spielFeld[x][y] == ZellenZustand.LEER) {
                     // leeres Feld gefunden: raus aus der while Schleife
                     break;
@@ -328,21 +330,79 @@ public class VierGewinntView extends View {
             boolean matchballSpieler = false;
             boolean matchballComputer = false;
 
-            y = erkenneMatchball(ZellenZustand.COMPUTER);
+            y = erkenneMatchball(spielFeld, ZellenZustand.COMPUTER);
             if (y >= 0)
                 matchballComputer = true;
 
             if (!matchballComputer) {
-                y = erkenneMatchball(ZellenZustand.SPIELER);
+                y = erkenneMatchball(spielFeld, ZellenZustand.SPIELER);
                 if (y >= 0)
                     matchballSpieler = true;
             }
-            if (!matchballComputer && !matchballSpieler) {
-                kiStaerke1();
-            } else {
-                x = niedrigsteFreieZeileErmitteln(y);
+            if (matchballComputer || matchballSpieler) {
+                x = niedrigsteFreieZeileErmitteln(spielFeld, y);
                 spielFeld[x][y] = ZellenZustand.COMPUTER;
+            } else {
+                kiStaerke1();
             }
+        }
+
+        void kiStaerke3() {
+            int x;
+            int y;
+            boolean matchballSpieler = false;
+            boolean matchballComputer = false;
+            boolean zugErmittelt = false;
+            ZellenZustand[][] spielFeldSimulation;
+
+            y = erkenneMatchball(spielFeld, ZellenZustand.COMPUTER);
+            if (y >= 0)
+                matchballComputer = true;
+
+            if (!matchballComputer) {
+                y = erkenneMatchball(spielFeld, ZellenZustand.SPIELER);
+                if (y >= 0)
+                    matchballSpieler = true;
+            }
+            if (matchballComputer || matchballSpieler) {
+                x = niedrigsteFreieZeileErmitteln(spielFeld, y);
+                spielFeld[x][y] = ZellenZustand.COMPUTER;
+                zugErmittelt = true;
+            } else {
+                if (anzahlFreieFelder==42 || anzahlFreieFelder ==41) {
+                    // am Anfang den Stein in den drei inneren Spalten setzen, um zu
+                    // verhindern, dass der Spieler auf der Grundlinie direkt gewinnt
+                    do {
+                        y = zufallszahlenGenerator.nextInt(ANZ_SPALTEN-4);
+                    } while (spielFeld[ANZ_ZEILEN-1][y+2] != ZellenZustand.LEER);
+                    spielFeld[ANZ_ZEILEN-1][y+2] = ZellenZustand.COMPUTER;
+                    zugErmittelt = true;
+                } else if (anzahlFreieFelder<33) {
+                    spielFeldSimulation = new ZellenZustand[ANZ_ZEILEN][ANZ_SPALTEN];
+                    for (int i = 0; i < ANZ_ZEILEN; i++)
+                        System.arraycopy(spielFeld[i], 0, spielFeldSimulation[i], 0, ANZ_SPALTEN);
+                    int zaehler = 0;
+                    do {
+                        do {
+                            y = zufallszahlenGenerator.nextInt(ANZ_SPALTEN);
+                            x = niedrigsteFreieZeileErmitteln(spielFeldSimulation, y);
+                        } while (spielFeldSimulation[x][y] != ZellenZustand.LEER);
+                        spielFeldSimulation[x][y] = ZellenZustand.COMPUTER;
+                        int ytest = erkenneMatchball(spielFeldSimulation,ZellenZustand.SPIELER);
+                        if (ytest==y)
+                            spielFeldSimulation[x][y] = ZellenZustand.LEER;
+                        else
+                            break;
+                        // zur Sicherheit, falls alle freien Felder einen Matchball verursachen
+                        if (++zaehler > 50)
+                            break;
+                    } while (true);
+                    spielFeld[x][y] = ZellenZustand.COMPUTER;
+                    zugErmittelt = true;
+                }
+            }
+            if (!zugErmittelt)
+                kiStaerke1();
         }
     }
 
@@ -397,7 +457,7 @@ public class VierGewinntView extends View {
         return new Spielergebnis(ZellenZustand.LEER);
     }
 
-    private int erkenneMatchball(ZellenZustand farbe) {
+    private int erkenneMatchball(ZellenZustand[][] spielFeld, ZellenZustand farbe) {
 
         int zwischen;
 
@@ -406,7 +466,7 @@ public class VierGewinntView extends View {
             for (int j = 0; j < ANZ_SPALTEN - 3; j++) {
                 zwischen = dreiv4Gleiche(farbe, spielFeld[i][j], spielFeld[i][j + 1], spielFeld[i][j + 2], spielFeld[i][j + 3]);
                 if (zwischen != -1)
-                    if (i == niedrigsteFreieZeileErmitteln(j + zwischen))
+                    if (i == niedrigsteFreieZeileErmitteln(spielFeld,j + zwischen))
                         return j + zwischen;
             }
         // Vertikalen testen
@@ -424,12 +484,12 @@ public class VierGewinntView extends View {
                 // erst die Diag. von links oben nach rechts unten
                 zwischen = dreiv4Gleiche(farbe, spielFeld[i][j], spielFeld[i + 1][j + 1], spielFeld[i + 2][j + 2], spielFeld[i + 3][j + 3]);
                 if (zwischen != -1)
-                    if ((i + zwischen) == niedrigsteFreieZeileErmitteln(j + zwischen))
+                    if ((i + zwischen) == niedrigsteFreieZeileErmitteln(spielFeld,j + zwischen))
                         return j + zwischen;
                 // dann von links unten nach rechts oben
                 zwischen = dreiv4Gleiche(farbe, spielFeld[i + 3][j], spielFeld[i + 2][j + 1], spielFeld[i + 1][j + 2], spielFeld[i][j + 3]);
                 if (zwischen != -1)
-                    if ((i + 3 - zwischen) == niedrigsteFreieZeileErmitteln(j + zwischen))
+                    if ((i + 3 - zwischen) == niedrigsteFreieZeileErmitteln(spielFeld,j + zwischen))
                         return j + zwischen;
             }
 

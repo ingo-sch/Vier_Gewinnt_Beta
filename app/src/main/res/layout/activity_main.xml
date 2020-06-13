@@ -71,14 +71,14 @@
                 android:id="@+id/radioButton2"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="fortgeschritten" />
+                android:text="mittel" />
 
             <RadioButton
                 android:id="@+id/radioButton3"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="episch"
-                android:visibility="invisible" />
+                android:text="besser"
+                android:visibility="visible" />
     </RadioGroup>
 </LinearLayout>
     <Space
